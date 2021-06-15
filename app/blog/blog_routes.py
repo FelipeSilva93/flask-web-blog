@@ -1,11 +1,13 @@
 from flask import Blueprint, jsonify, request
-from .app import db
+from flask_jwt_extended import jwt_required
+from app import db
 
 
-blogs = Blueprint('blogs', __name__)
+blogs = Blueprint('my_blogs', __name__)
 
 
 @blogs.route('/add_blog', methods=['POST'])
+@jwt_required
 def create_blog():
     data = request.get_json()
 
@@ -32,7 +34,8 @@ def create_blog():
     return jsonify({'id': blog_id})
 
 
-@blogs.route('/blogs', methods=['GET'])
+@blogs.route('/all_blogs', methods=['GET'])
+@jwt_required
 def get_all_blogs():
     blogs = Blog.query.all()
     serialized_data = []
@@ -44,6 +47,7 @@ def get_all_blogs():
 
 
 @blogs.route('blog/<int:id>', methods=['GET'])
+@jwt_required
 def get_single_blog(id):
     blog = Blog.query.filter_by(id=id).first()
     serialized_blog = blog.serialize
@@ -56,6 +60,7 @@ def get_single_blog(id):
 
 
 @blogs.route('/update_blog/<int:id>', methods=['PUT'])
+@jwt_required
 def update_blog(id):
     data = request.get_json()
     blog = Blog.query.filter_by(id=id).first_or_404()
@@ -72,6 +77,7 @@ def update_blog(id):
 
 
 @blogs.route('/delete_blog/<int:id>', methods=['DELETE'])
+@jwt_required
 def delete_blog(id):
     blog = Blog.query.filter_by(id=id).first()
     db.session.delete(blog)
